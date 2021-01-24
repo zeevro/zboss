@@ -8,7 +8,7 @@ import traceback
 from urllib.request import urlopen, Request
 
 
-URL_BASE = 'https://main.sem.zeevro.com/api/device'
+URL_BASE = 'https://your.server.com/api/device'
 
 
 class Client:
