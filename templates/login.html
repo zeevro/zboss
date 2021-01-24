@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block body_content %}
+    <h1>Login</h1>
+    <form action="/login" method="post">
+      {% if error_msg %}<div class="error">{{ error_msg }}</div>{% endif %}
+      <div class="input-field"><label>Username: <input type="text" name="username"></label></div>
+      <div class="input-field"><label>Password: <input type="password" name="password"></label></div>
+      <div class="input-field"><input type="submit" value="Login"></div>
+    </form>
+{% endblock %}

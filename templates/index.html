@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block head_content %}
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(window.location.reload.bind(window.location), 30000);
+      });
+    </script>
+{% endblock %}
+
+{% block body_content %}
+    <h1>Online devices</h1>
+    <table>
+      <tr>
+        <th>Name</th>
+        <th>Online?</th>
+        <th>Actions</th>
+      </tr>
+      {% for device in devices %}
+      <tr>
+        <td><a href="http://{{ device.name }}.sem.zeevro.com/" target="_">{{ device.name }}</a></td>
+        <td><span class="online-status{% if not device.is_online %} not-online{% endif %}">{% if device.is_online %}Yes{% else %}No{% endif %}</span></td>
+        <td>
+          {% for command in commands %}
+          <button class="device-command{% if command.confirm %} device-command-confirm{% endif %}" data-device="{{ device.name }}" data-command="{{ command.command|safe }}"{% if command.wait %} data-wait="true"{% endif %}>{{ command.title }}</button>
+          {% endfor %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    <small>{{ now }}</small>
+    <small><a href="{{ url_for('logout') }}">Logout</a></small>
+    <pre id="output"></pre>
+    <script>
+      [...document.getElementsByClassName('device-command')].forEach(elem => {
+        elem.addEventListener('click', () => {
+          if (elem.classList.contains('device-command-confirm') && !confirm('Are you sure you want to run "' + elem.dataset.command + '"?')) return;
+          const url = '{{ url_for('server_command') }}?' + new URLSearchParams(elem.dataset);
+          if (elem.dataset.wait) {
+            fetch(url).then(data => data.json()).then(json => { document.getElementById('output').innerHTML = 'Device: ' + elem.dataset.device + '\nCommand: ' + elem.dataset.command + '\n\nReturn code: ' + json.ret_code + '\n\nStdOut:\n' + json.out + '\n\nStdErr:\n' + json.err });
+          } else {
+            fetch(url).then(data => data.json()).then(console.log);
+          }
+        })
+      })
+    </script>
+{% endblock %}

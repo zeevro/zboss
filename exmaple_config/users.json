@@ -1,0 +1,7 @@
+[
+    {
+        "id": 1,
+        "username": "my_username",
+        "password": "plain$$use werkzeug.security.generate_password_hash()"
+    }
+]

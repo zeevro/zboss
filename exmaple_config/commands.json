@@ -1,0 +1,7 @@
+[
+    {"title": "Reboot", "command": "reboot", "confirm": true, "wait": false},
+    {"title": "Poweroff", "command": "poweroff", "confirm": true, "wait": false},
+    {"title": "Process list", "command": "ps axf | grep -v ']$'", "confirm": false, "wait": true},
+    {"title": "netstat", "command": "netstat -naptu", "confirm": false, "wait": true},
+    {"title": "SV status", "command": "supervisorctl status", "confirm": false, "wait": true}
+]
