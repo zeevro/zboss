@@ -5,9 +5,8 @@ After=network-online.target
 [Service]
 User=root
 Group=root
-ExecStart=/usr/local/bin/zboss-client <device_name>
+ExecStart=/usr/local/bin/zboss-client -u https://your.server.com -n device_name
 Restart=always
-RestartSec=5
 
 [Install]
 WantedBy=multi-user.target

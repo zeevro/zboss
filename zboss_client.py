@@ -1,14 +1,12 @@
 #!/usr/bin/python3
 
+import argparse
 import json
 import os
 import subprocess
-import sys
+import time
 import traceback
 from urllib.request import urlopen, Request
-
-
-URL_BASE = 'https://your.server.com/api/device'
 
 
 class Client:
@@ -17,7 +15,7 @@ class Client:
         self.device_name = device_name
 
     def server_request(self, endpoint: str, data: bytes = None):
-        req = Request(f"{URL_BASE.rstrip('/')}/{endpoint.lstrip('/')}", headers={'X-Device-Id': self.device_name, 'Content-Type': 'application/octet-stream'}, data=data)
+        req = Request(f"{self.url_base.rstrip('/')}/{endpoint.lstrip('/')}", headers={'X-Device-Id': self.device_name, 'Content-Type': 'application/octet-stream'}, data=data)
         return json.load(urlopen(req))
 
     def register(self):
@@ -81,9 +79,22 @@ class Client:
 
 
 def main():
-    cli = Client(URL_BASE, sys.argv[1])
-    cli.register()
-    cli.run()
+    p = argparse.ArgumentParser()
+    p.add_argument('-n', '--device-name')
+    p.add_argument('-u', '--url-base')
+    p.add_argument('-N', '--no-reconnect', action='store_true')
+    args = p.parse_args()
+
+    cli = Client(f"{args.url_base.rstrip('/')}/api/device", args.device_name)
+    while 1:
+        try:
+            cli.register()
+            cli.run()
+        except Exception:
+            traceback.print_exc()
+        if args.no_reconnect:
+            break
+        time.sleep(5)
 
 
 if __name__ == "__main__":
