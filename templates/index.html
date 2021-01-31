@@ -13,16 +13,16 @@
     <table>
       <tr>
         <th>Name</th>
-        <th>Online?</th>
+        <th>IP</th>
         <th>Actions</th>
       </tr>
       {% for device in devices %}
       <tr>
         <td><a href="http://{{ device.name }}.sem.zeevro.com/" target="_">{{ device.name }}</a></td>
-        <td><span class="online-status{% if not device.is_online %} not-online{% endif %}">{% if device.is_online %}Yes{% else %}No{% endif %}</span></td>
+        <td><span class="online-status{% if device.ip == 'offline' %} not-online{% endif %}">{{ device.ip }}</span></td>
         <td>
           {% for command in commands %}
-          <button class="device-command{% if command.confirm %} device-command-confirm{% endif %}" data-device="{{ device.name }}" data-command="{{ command.command|safe }}"{% if command.wait %} data-wait="true"{% endif %}>{{ command.title }}</button>
+          <button {% if device.ip == 'offline' %}disabled {% endif %}class="device-command{% if command.confirm %} device-command-confirm{% endif %}" data-device="{{ device.name }}" data-command="{{ command.command|safe }}"{% if command.wait %} data-wait="true"{% endif %}>{{ command.title }}</button>
           {% endfor %}
         </td>
       </tr>

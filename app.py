@@ -3,6 +3,7 @@ import os
 import socket
 import subprocess
 import time
+import traceback
 
 from flask import Flask, abort, render_template, request, redirect, url_for, jsonify
 from flask_login import LoginManager, login_required, UserMixin, login_user, logout_user
@@ -23,7 +24,6 @@ class User(UserMixin):
             return json.load(f)
 
     def __init__(self, user_id):
-        print(f'called User({user_id!r})')
         for user in self._load_users():
             if str(user['id']) == str(user_id):
                 self.__dict__.update(user)
@@ -70,14 +70,27 @@ def logout():
 @app.route('/')
 @login_required
 def index():
-    netstat = subprocess.check_output(['netstat', '-nlx']).decode()
-    devices = [
-        {
+    netstat = subprocess.check_output(['netstat', '-nlpx'], stderr=subprocess.PIPE).decode()
+    devices = []
+    for name, ports in DEVICES:
+        d = {
             'name': name,
-            'is_online': SOCKET_PATH.format(name) in netstat,
+            'is_online': False,
+            'ip': 'offline',
         }
-        for name, ports in DEVICES
-    ]
+        for line in netstat.splitlines():
+            if SOCKET_PATH.format(name) in line:
+                d['is_online'] = True
+                try:
+                    pid = line.split()[-2].split('/')[0]
+                    with open(f'/proc/{pid}/environ') as f:
+                        for env in f.read().split('\0'):
+                            if env.startswith('SSH_CLIENT'):
+                                d['ip'] = env.split('=', 1)[1].split()[0]
+                except Exception:
+                    traceback.print_exc()
+        devices.append(d)
+
     return render_template('index.html', devices=devices, commands=COMMANDS, now=time.strftime('%Y-%m-%d %H:%M:%S'))
 
 

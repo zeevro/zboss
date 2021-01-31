@@ -11,18 +11,16 @@ th, td {
   padding-right: 15px;
 }
 
-.online-status {
-  font-weight: bold;
-  color: green;
-}
-
 .online-status.not-online {
   color: red;
 }
 
 .device-command-confirm {
-  color: red;
   font-weight: bold;
+}
+
+.device-command-confirm:enabled {
+  color: red;
 }
 
 .input-field {
