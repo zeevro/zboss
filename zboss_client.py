@@ -72,7 +72,7 @@ class Client:
                 except Exception:
                     traceback.print_exc()
 
-            print(f'ssh has died: {ssh_proc.stderr.read().decode().strip()}')
+            print(f'ssh has died: {ret_code} {ssh_proc.stderr.read().decode().strip()}')
 
     def run(self):
         self.run_ssh(self.get_ssh_command())
