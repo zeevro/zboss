@@ -18,7 +18,7 @@
       </tr>
       {% for device in devices %}
       <tr>
-        <td><a href="http://{{ device.name }}.sem.zeevro.com/" target="_">{{ device.name }}</a></td>
+        <td><a href="https://{{ device.name }}.{{ request.host.split('.', 1)[1] }}/" target="_blank">{{ device.name }}</a></td>
         <td><span class="online-status{% if device.ip == 'offline' %} not-online{% endif %}">{{ device.ip }}</span></td>
         <td>
           {% for command in commands %}
