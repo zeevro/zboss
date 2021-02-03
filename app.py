@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import socket
 import subprocess
 import time
@@ -50,6 +51,18 @@ with open(os.path.join(os.path.dirname(__file__), 'commands.json')) as f:
 SOCKET_PATH = '/tmp/zboss-{}.sock'
 
 
+def get_client_ip_from_pid(pid):
+    try:
+        with open(f'/proc/{pid}/environ') as f:
+            for env in f.read().split('\0'):
+                if env.startswith('SSH_CLIENT'):
+                    return env.split('=', 1)[1].split()[0]
+    except Exception:
+        traceback.print_exc()
+
+    return 'unknonwn'
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
@@ -71,25 +84,15 @@ def logout():
 @login_required
 def index():
     netstat = subprocess.check_output(['netstat', '-nlpx'], stderr=subprocess.PIPE).decode()
-    devices = []
-    for name, ports in DEVICES:
-        d = {
+    online_devices_pids = dict(map(reversed, re.findall(r'(\d+)/[\w\.\+\-]+\s+' + SOCKET_PATH.format(r'([\w\-]+)'), netstat)))
+    devices = [
+        {
             'name': name,
-            'is_online': False,
-            'ip': 'offline',
+            'is_online': name in online_devices_pids,
+            'ip': get_client_ip_from_pid(online_devices_pids[name]) if name in online_devices_pids else 'offline',
         }
-        for line in netstat.splitlines():
-            if SOCKET_PATH.format(name) in line:
-                d['is_online'] = True
-                try:
-                    pid = line.split()[-2].split('/')[0]
-                    with open(f'/proc/{pid}/environ') as f:
-                        for env in f.read().split('\0'):
-                            if env.startswith('SSH_CLIENT'):
-                                d['ip'] = env.split('=', 1)[1].split()[0]
-                except Exception:
-                    traceback.print_exc()
-        devices.append(d)
+        for name, ports in DEVICES
+    ]
 
     return render_template('index.html', devices=devices, commands=COMMANDS, now=time.strftime('%Y-%m-%d %H:%M:%S'))
 
