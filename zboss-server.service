@@ -6,7 +6,11 @@ After=network.target
 User=zboss
 Group=zboss
 WorkingDirectory=/home/zeev/zboss
-ExecStart=/usr/local/bin/flask run -p 80
+ExecStart=/usr/local/bin/gunicorn -b 127.0.0.1:5454 app:app
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=5
+PrivateTmp=true
 Restart=always
 
 [Install]
